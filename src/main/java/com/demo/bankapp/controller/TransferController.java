@@ -45,7 +45,7 @@ public class TransferController {
 			throw new BadRequestException(Constants.MESSAGE_INVALIDCURRENCY);
 		}
 
-		if (request.getSenderUsername() == null || request.getSenderUsername().equals("")) {
+		if (request.getSenderUsername() != null || request.getSenderUsername().equals("")) {
 			throw new BadRequestException(Constants.MESSAGE_INVALIDUSERNAME);
 		}
 

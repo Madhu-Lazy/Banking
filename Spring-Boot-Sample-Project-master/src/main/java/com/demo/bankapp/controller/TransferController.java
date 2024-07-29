@@ -96,14 +96,25 @@ public class TransferController {
 
 		BigDecimal rate;
 		BigDecimal tryEquivalent;
-		for (Transfer transfer : last24HourTransfers) {
-			rate = BigDecimal.valueOf(currencyRates.get(transfer.getCurrency()));
-			tryEquivalent = transfer.getAmount().divide(rate, 9, RoundingMode.HALF_UP);
+//		for (Transfer transfer : last24HourTransfers) {
+//			rate = BigDecimal.valueOf(currencyRates.get(transfer.getCurrency()));
+//			tryEquivalent = transfer.getAmount().divide(rate, 9, RoundingMode.HALF_UP);
+//
+//			transferTryEquivalent = transferTryEquivalent.add(tryEquivalent);
+//			if (transferTryEquivalent.compareTo(dailyTransferLimit) == 1) {
+//				throw new TransactionLimitException(Constants.MESSAGE_EXCEEDEDMAXVALUEFORDAY);
+//			}
+//		}
 
-			transferTryEquivalent = transferTryEquivalent.add(tryEquivalent);
-			if (transferTryEquivalent.compareTo(dailyTransferLimit) == 1) {
-				throw new TransactionLimitException(Constants.MESSAGE_EXCEEDEDMAXVALUEFORDAY);
-			}
+		BigDecimal transferTryEquivalent = last24HourTransfers.stream()
+				.map(transfer -> {
+					BigDecimal rate = BigDecimal.valueOf(currencyRates.getOrDefault(transfer.getCurrency(), 1.0));
+					return transfer.getAmount().divide(rate, 9, RoundingMode.HALF_UP);
+				})
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+		if (transferTryEquivalent.compareTo(dailyTransferLimit) > 0) {
+			throw new TransactionLimitException(Constants.MESSAGE_EXCEEDEDMAXVALUEFORDAY);
 		}
 
 	}
